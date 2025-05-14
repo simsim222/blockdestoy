@@ -5,148 +5,330 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>블럭깨기 게임</title>
   <style>
-    body {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      font-family: Arial, sans-serif;
-      background-color: #f0f0f0;
-      margin: 0;
-      padding: 20px;
+    body { display: flex; flex-direction: column; align-items: center; margin: 0; padding: 20px; font-family: Arial, sans-serif; background-color: #e6e6fa; }
+    #startScreen, #gameScreen { width: 100%; max-width: 800px; text-align: center; margin: 0 auto; }
+    #gameArea { background: #fff; padding: 10px; border-radius: 8px; position: relative; display: flex; flex-direction: column; align-items: center; }
+    #grid { display: grid; background: #fff; border-radius: 4px; margin: 10px 0; gap: 0; }
+    .cell { width: 50px; height: 50px; border: 1px solid #ccc; cursor: pointer; }
+    .cell.red {
+      background-color: red;
+      background-image: url('file:///C:/Users/이정현/Desktop/block%20game/red.png');
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
     }
-    #startScreen, #gameScreen {
-      width: 100%;
-      max-width: 800px;
-      margin: 0 auto;
-      text-align: center;
+    .cell.blue {
+      background-color: blue;
+      background-image: url('file:///C:/Users/이정현/Desktop/block%20game/blue.png');
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
     }
-    #gameContainer {
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      width: 100%;
+    .cell.yellow {
+      background-color: yellow;
+      background-image: url('file:///C:/Users/이정현/Desktop/block%20game/yellow.png');
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
     }
-    #instructions {
-      width: 400px;
-      border: 1px solid #000;
-      background: #fff;
-      padding: 10px;
-      margin-right: 20px;
-      text-align: left;
-      font-size: 0.9rem;
-      white-space: pre-wrap;
+    .cell.green {
+      background-color: green;
+      background-image: url('file:///C:/Users/이정현/Desktop/block%20game/green.png');
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
     }
-    #gameArea {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      position: relative;
-    }
-    #grid {
-      display: grid;
-      background-color: #fff;
-      padding: 10px;
-      border-radius: 8px;
-      margin: 10px 0;
-      gap: 0;
-      pointer-events: auto;
-    }
-    .cell {
-      width: 50px;
-      height: 50px;
-      border: 1px solid #ccc;
-      cursor: pointer;
-    }
-    .cell.red { background-color: red; }
-    .cell.blue { background-color: blue; }
-    .cell.yellow { background-color: yellow; }
-    .cell.green { background-color: green; }
     .cell.empty { background: transparent; cursor: default; }
     .cell.selected { outline: 3px solid #000; }
     @keyframes blink { 0%,100%{opacity:1;}50%{opacity:0;} }
     .cell.blink { animation: blink 0.5s ease-in-out; }
     @keyframes destroy { to{transform:scale(0);opacity:0;} }
     .cell.destroy { animation: destroy 0.3s ease-in-out forwards; }
-    #remaining {
-      font-size: 1.2rem;
-      margin-top: 10px;
-    }
-    button {
-      margin-top: 10px;
-      padding: 8px 16px;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-    #message {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 100%;
-      text-align: center;
-      font-size: 1.2rem;
-      background: rgba(255,255,255,0.8);
-      padding: 10px;
-      border-radius: 8px;
-      display: none;
-    }
+    #remaining { font-size: 1.2rem; margin-top: 10px; }
+    button { margin-top: 10px; padding: 8px 16px; font-size: 1rem; cursor: pointer; }
+    #message { position: absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(255,255,255,0.8); padding:10px; border-radius:8px; display:none; font-size:1.2rem; }
+    #instructions { width: 100%; max-width: 800px; background: #fff; border:1px solid #000; padding:10px; margin-top:20px; font-size:13px; border-radius:8px; }
+    #instructions .title { text-align:center; margin-bottom:10px; }
+    #instructions p { margin:8px 0; }
   </style>
 </head>
 <body>
   <div id="startScreen">
     <h1>블럭깨기 게임</h1>
-    <input type="text" id="playerName" placeholder="이름을 입력하세요" />
-    <button id="startBtn">시작</button>
+    <button id="startBtn">게임 시작</button>
   </div>
   <div id="gameScreen" style="display:none;">
-    <div id="gameContainer">
-      <div id="instructions">[게임 방법]
-1. 블럭을 직선으로 3개 이상 이으면 블럭이 파괴됩니다
-2. 블럭 1칸을 선택하여 인접한 블럭 1칸과 위치를 바꿀 수 있습니다
-3. 블럭 절반이 파괴되면 새로운 블럭들이 보충됩니다
-4. "블럭채우기" 버튼을 누르면 블럭 전체를 무작위로 다시 채워줍니다</div>
-      <div id="gameArea">
-        <div id="score"></div>
-        <div id="grid"></div>
-        <div id="remaining"></div>
-        <button id="fillBtn"></button>
-        <div id="message"></div>
-      </div>
+    <div id="gameArea">
+      <div id="score"></div>
+      <div id="grid"></div>
+      <div id="remaining"></div>
+      <button id="fillBtn">블럭채우기(남은횟수 1회)</button>
+      <div id="message"></div>
+    </div>
+    <div id="instructions">
+      <div class="title">[게임 방법]</div>
+      <p>1. 인접(상하좌우)한 같은 색 블럭이 3개 이상 직선으로 모이면 파괴됩니다</p>
+      <p>2. 2×2 정사각형으로 같은 색 블럭 4개가 모이면 파괴됩니다</p>
+      <p>3. 빈칸 절반 이상 발생 시 전체 보충</p>
+      <p>4. "블럭채우기" 버튼으로 전체 무작위 보충</p>
     </div>
   </div>
   <script>
-    const stages = [ { rows:8, cols:8, target:50, maxSwaps:20 }, { rows:10, cols:10, target:70, maxSwaps:23 }, { rows:12, cols:12, target:100, maxSwaps:25 } ];
+    const stages = [
+      { rows: 8, cols: 8,  target: 50,  maxSwaps: 20 },
+      { rows: 10, cols: 10, target: 70,  maxSwaps: 23 },
+      { rows: 12, cols: 12, target: 100, maxSwaps: 25 }
+    ];
     const COLORS = ['red','blue','yellow','green'];
-    let currentStage=0, grid=[], score=0, swapsRemaining=0, fillRemaining=1, firstSelected=null, gameActive=false, isLocked=false;
+    let currentStage = 0, grid = [], score = 0, swapsRemaining = 0, fillRemaining = 1;
+    let firstSelected = null, gameActive = false, isLocked = false;
 
-    const startScreen=document.getElementById('startScreen');
-    const gameScreen=document.getElementById('gameScreen');
-    const startBtn=document.getElementById('startBtn');
-    const scoreEl=document.getElementById('score');
-    const gridEl=document.getElementById('grid');
-    const remainingEl=document.getElementById('remaining');
-    const fillBtn=document.getElementById('fillBtn');
-    const messageEl=document.getElementById('message');
+    const startScreen = document.getElementById('startScreen');
+    const gameScreen  = document.getElementById('gameScreen');
+    const startBtn    = document.getElementById('startBtn');
+    const scoreEl     = document.getElementById('score');
+    const gridEl      = document.getElementById('grid');
+    const remainingEl = document.getElementById('remaining');
+    const fillBtn     = document.getElementById('fillBtn');
+    const messageEl   = document.getElementById('message');
 
-    startBtn.addEventListener('click',()=>{ const name=document.getElementById('playerName').value.trim(); if(!name){alert('이름을 입력해주세요.');return;} startScreen.style.display='none'; gameScreen.style.display='block'; initStage(); });
-    fillBtn.addEventListener('click',()=>{ if(!gameActive||fillRemaining<=0) return; fillRemaining--; initGrid(); renderGrid(); updateUI(); });
+    // 이벤트 바인딩
+    startBtn.addEventListener('click', () => {
+      startScreen.style.display = 'none';
+      gameScreen.style.display  = 'block';
+      initStage();
+    });
+    fillBtn.addEventListener('click', () => {
+      if (!gameActive || fillRemaining <= 0) return;
+      fillRemaining--;
+      initGrid(); renderGrid(); updateUI();
+    });
 
-    function updateUI(){ const st=stages[currentStage]; scoreEl.textContent=`스테이지 ${currentStage+1} (${st.rows}x${st.cols}) 점수: ${score} / 목표: ${st.target}`; remainingEl.textContent=`남은 횟수: ${swapsRemaining}회`; fillBtn.textContent=`블럭채우기(남은횟수 ${fillRemaining}회)`; fillBtn.disabled=fillRemaining<=0; gridEl.style.gridTemplateColumns=`repeat(${st.cols},50px)`; gridEl.style.gridTemplateRows=`repeat(${st.rows},50px)`; gridEl.style.pointerEvents='auto'; }
+    // UI 업데이트
+    function updateUI() {
+      const st = stages[currentStage];
+      scoreEl.textContent     = `스테이지 ${currentStage+1} (${st.rows}x${st.cols}) 점수: ${score} / 목표: ${st.target}`;
+      remainingEl.textContent = `남은 횟수: ${swapsRemaining}회`;
+      fillBtn.textContent     = `블럭채우기(남은횟수 ${fillRemaining}회)`;
+      fillBtn.disabled        = fillRemaining <= 0;
+      gridEl.style.gridTemplateColumns = `repeat(${st.cols},50px)`;
+      gridEl.style.gridTemplateRows    = `repeat(${st.rows},50px)`;
+    }
 
-    function initStage(){ gameActive=true; isLocked=false; messageEl.style.display='none'; messageEl.innerHTML=''; const st=stages[currentStage]; score=0; swapsRemaining=st.maxSwaps; fillRemaining=1; firstSelected=null; initGrid(); renderGrid(); updateUI(); }
-    function initGrid(){ const st=stages[currentStage]; grid=Array.from({length:st.rows},()=>Array(st.cols).fill(null)); for(let r=0;r<st.rows;r++) for(let c=0;c<st.cols;c++) grid[r][c]=getValidColor(r,c);}    
-    function getValidColor(r,c){ const invalid=new Set(); if(c>=2&&grid[r][c-1]===grid[r][c-2])invalid.add(grid[r][c-1]); if(r>=2&&grid[r-1][c]===grid[r-2][c])invalid.add(grid[r-1][c]); const choices=COLORS.filter(col=>!invalid.has(col)); return choices[Math.floor(Math.random()*choices.length)]; }
-    function renderGrid(){ gridEl.innerHTML=''; const st=stages[currentStage]; for(let r=0;r<st.rows;r++) for(let c=0;c<st.cols;c++){ const cell=document.createElement('div'); cell.className='cell '+(grid[r][c]||'empty'); cell.dataset.r=r; cell.dataset.c=c; cell.addEventListener('click',onCellClick); gridEl.appendChild(cell);} }
-    function onCellClick(e){ if(!gameActive||swapsRemaining<=0||isLocked) return; const cell=e.currentTarget; const r=+cell.dataset.r, c=+cell.dataset.c; if(!grid[r][c]) return; if(!firstSelected){ firstSelected={cell,r,c}; cell.classList.add('selected'); }else{ const prev=firstSelected.cell, r0=firstSelected.r, c0=firstSelected.c; prev.classList.remove('selected'); firstSelected=null; if(Math.abs(r0-r)+Math.abs(c0-c)===1){ swapsRemaining--; updateUI(); isLocked=true; gridEl.style.pointerEvents='none'; animateSwap(prev,cell,()=>{ [grid[r0][c0],grid[r][c]]=[grid[r][c],grid[r0][c0]]; renderGrid(); resolveMatches(); setTimeout(()=>{ isLocked=false; gridEl.style.pointerEvents='auto'; },1200); }); } }}
-    function animateSwap(a,b,cb){ const r1=a.getBoundingClientRect(), r2=b.getBoundingClientRect(); const dx=r2.left-r1.left, dy=r2.top-r1.top; a.style.transition=b.style.transition='transform 0.3s ease'; a.style.transform=`translate(${dx}px,${dy}px)`; b.style.transform=`translate(${-dx}px,${-dy}px)`; a.addEventListener('transitionend',function h(){ a.style.transition=b.style.transition=''; a.style.transform=b.style.transform=''; a.removeEventListener('transitionend',h); cb(); }); }
-    function resolveMatches(){ const matched=findMatches(); if(!matched.length){ checkFail(); return; } score+=matched.length; updateUI(); matched.forEach(({r,c})=>{ gridEl.children[r*stages[currentStage].cols+c].classList.add('blink'); }); setTimeout(()=>{ matched.forEach(({r,c})=>{ const cell=gridEl.children[r*stages[currentStage].cols+c]; cell.classList.remove('blink'); cell.classList.add('destroy'); }); setTimeout(()=>{ matched.forEach(({r,c})=>grid[r][c]=null); applyGravity(); const st=stages[currentStage]; let empties=0; for(let i=0;i<st.rows;i++)for(let j=0;j<st.cols;j++) if(!grid[i][j]) empties++; if(empties>=Math.floor((st.rows*st.cols)/2)) fillAllBlanks(); else{ renderGrid(); if(score>=stages[currentStage].target) onStageSuccess(); else setTimeout(resolveMatches,300);} },300); },500); }
-    function findMatches(){ const m=[]; const st=stages[currentStage]; for(let r=0;r<st.rows;r++){ let cnt=1; for(let c=1;c<=st.cols;c++){ if(c<st.cols&&grid[r][c]&&grid[r][c]===grid[r][c-1])cnt++; else{ if(cnt>=3)for(let k=0;k<cnt;k++)m.push({r,c:c-1-k}); cnt=1;} }} for(let c=0;c<st.cols;c++){ let cnt=1; for(let r=1;r<=st.rows;r++){ if(r<st.rows&&grid[r][c]&&grid[r][c]===grid[r-1][c])cnt++; else{ if(cnt>=3)for(let k=0;k<cnt;k++)m.push({r:r-1-k,c}); cnt=1;} }} return m; }
-    function applyGravity(){ const st=stages[currentStage]; for(let c=0;c<st.cols;c++){ let empty=0; for(let r=st.rows-1;r>=0;r--){ if(!grid[r][c]) empty++; else if(empty>0){ grid[r+empty][c]=grid[r][c]; grid[r][c]=null; } }} }
-    function fillAllBlanks(){ const st=stages[currentStage]; const filled=[]; for(let r=0;r<st.rows;r++)for(let c=0;c<st.cols;c++)if(!grid[r][c]){ grid[r][c]=COLORS[Math.floor(Math.random()*COLORS.length)]; filled.push({r,c}); } renderGrid(); filled.forEach(({r,c})=>{ const cell=gridEl.children[r*st.cols+c]; cell.style.transform=`translateY(-${st.rows*52}px)`; }); requestAnimationFrame(()=>{ filled.forEach(({r,c})=>{ const cell=gridEl.children[r*st.cols+c]; cell.style.transition='transform 0.5s ease'; cell.style.transform=''; }); }); setTimeout(()=>{ if(score>=stages[currentStage].target) onStageSuccess(); else setTimeout(resolveMatches,300); },600); }
-    function onStageSuccess(){ gameActive=false; messageEl.style.display='block'; if(currentStage<stages.length-1){ messageEl.innerHTML=`<div>축하합니다! ${currentStage+1}단계 성공!</div><button id="nextBtn">다음 스테이지</button>`; document.getElementById('nextBtn').addEventListener('click',()=>{ messageEl.style.display='none'; currentStage++; initStage(); }); } else { messageEl.innerHTML=`<div>축하합니다! 모두 성공하였습니다!</div><button id="homeBtn">처음으로 돌아가기</button>`; document.getElementById('homeBtn').addEventListener('click',restart); } }
-    function checkFail(){ if(swapsRemaining<=0){ gameActive=false; messageEl.style.display='block'; messageEl.innerHTML=`<div>Game Over</div><button id="restartBtn">처음으로 돌아가기</button>`; document.getElementById('restartBtn').addEventListener('click',restart); } }
-    function restart(){ currentStage=0; startScreen.style.display='block'; gameScreen.style.display='none'; messageEl.style.display='none'; }
+    // 스테이지 초기화
+    function initStage() {
+      gameActive = true; isLocked = false;
+      messageEl.style.display = 'none';
+      const st = stages[currentStage];
+      score          = 0;
+      swapsRemaining = st.maxSwaps;
+      fillRemaining  = 1;
+      firstSelected  = null;
+      initGrid(); renderGrid(); updateUI();
+    }
+
+    // 그리드 초기화
+    function initGrid() {
+      const st = stages[currentStage];
+      do {
+        grid = Array.from({length: st.rows}, () => Array(st.cols).fill(null));
+        for (let r = 0; r < st.rows; r++) {
+          for (let c = 0; c < st.cols; c++) {
+            grid[r][c] = getValidColor(r, c);
+          }
+        }
+      } while (hasInvalid());
+    }
+
+    // 초기 배치 검증
+    function hasInvalid() {
+      const st = stages[currentStage];
+      // 가로 3
+      for (let r=0; r<st.rows; r++) {
+        let cnt=1;
+        for (let c=1; c<st.cols; c++) {
+          if (grid[r][c] && grid[r][c]===grid[r][c-1]) cnt++; else cnt=1;
+          if (cnt>=3) return true;
+        }
+      }
+      // 세로 3
+      for (let c=0; c<st.cols; c++) {
+        let cnt=1;
+        for (let r=1; r<st.rows; r++) {
+          if (grid[r][c] && grid[r][c]===grid[r-1][c]) cnt++; else cnt=1;
+          if (cnt>=3) return true;
+        }
+      }
+      // 정사각 2x2
+      for (let r=0; r<st.rows-1; r++) {
+        for (let c=0; c<st.cols-1; c++) {
+          const col = grid[r][c];
+          if (col && grid[r+1][c]===col && grid[r][c+1]===col && grid[r+1][c+1]===col)
+            return true;
+        }
+      }
+      return false;
+    }
+
+    // 유효 색 반환
+    function getValidColor(r,c) {
+      const invalid = new Set();
+      if (c>=2 && grid[r][c-1]===grid[r][c-2]) invalid.add(grid[r][c-1]);
+      if (r>=2 && grid[r-1][c]===grid[r-2][c]) invalid.add(grid[r-1][c]);
+      if (r>0 && c>0) {
+        const a=grid[r-1][c-1], b=grid[r-1][c], d=grid[r][c-1];
+        if (a && a===b && a===d) invalid.add(a);
+      }
+      const choices = COLORS.filter(col=>!invalid.has(col));
+      return choices[Math.floor(Math.random()*choices.length)];
+    }
+
+    // 그리드 렌더
+    function renderGrid() {
+      gridEl.innerHTML = '';
+      const st = stages[currentStage];
+      for (let r=0; r<st.rows; r++) {
+        for (let c=0; c<st.cols; c++) {
+          const cell = document.createElement('div');
+          cell.className = 'cell ' + (grid[r][c]|| 'empty');
+          cell.dataset.r = r; cell.dataset.c = c;
+          cell.addEventListener('click', onCellClick);
+          gridEl.appendChild(cell);
+        }
+      }
+    }
+
+    // 셀 클릭
+    function onCellClick(e) {
+      if (!gameActive || swapsRemaining<=0 || isLocked) return;
+      const cell = e.currentTarget;
+      const r = +cell.dataset.r, c = +cell.dataset.c;
+      if (!grid[r][c]) return;
+      if (!firstSelected) {
+        firstSelected = {cell, r, c};
+        cell.classList.add('selected');
+      } else {
+        const prev = firstSelected.cell;
+        const r0 = firstSelected.r, c0 = firstSelected.c;
+        prev.classList.remove('selected'); firstSelected = null;
+        if (Math.abs(r0-r)+Math.abs(c0-c)===1) {
+          swapsRemaining--; updateUI(); isLocked=true; gridEl.style.pointerEvents='none';
+          animateSwap(prev, cell, ()=>{
+            [grid[r0][c0], grid[r][c]] = [grid[r][c], grid[r0][c0]];
+            renderGrid(); resolveMatches();
+            setTimeout(()=>{ isLocked=false; gridEl.style.pointerEvents='auto'; }, 1200);
+          });
+        }
+      }
+    }
+
+    // 스왑 애니
+    function animateSwap(a,b,cb) {
+      const r1=a.getBoundingClientRect(), r2=b.getBoundingClientRect();
+      const dx=r2.left-r1.left, dy=r2.top-r1.top;
+      a.style.transition = b.style.transition = 'transform 0.3s ease';
+      a.style.transform = `translate(${dx}px,${dy}px)`;
+      b.style.transform = `translate(${-dx}px,${-dy}px)`;
+      a.addEventListener('transitionend', function h() {
+        a.style.transition = b.style.transition = '';
+        a.style.transform = b.style.transform = '';
+        a.removeEventListener('transitionend', h);
+        cb();
+      });
+    }
+
+    // 매치 처리
+    function resolveMatches() {
+      const st = stages[currentStage];
+      const toRemove = new Set();
+      // 가로 3이상
+      for (let r=0;r<st.rows;r++){
+        let cnt=1;
+        for (let c=1;c<st.cols;c++){
+          if (grid[r][c] && grid[r][c]===grid[r][c-1]) cnt++; else cnt=1;
+          if (cnt>=3) for (let k=c-cnt+1;k<=c;k++) toRemove.add(`${r},${k}`);
+        }
+      }
+      // 세로 3이상
+      for (let c=0;c<st.cols;c++){
+        let cnt=1;
+        for (let r=1;r<st.rows;r++){
+          if (grid[r][c] && grid[r][c]===grid[r-1][c]) cnt++; else cnt=1;
+          if (cnt>=3) for (let k=r-cnt+1;k<=r;k++) toRemove.add(`${k},${c}`);
+        }
+      }
+      // 2x2
+      for (let r=0;r<st.rows-1;r++){
+        for (let c=0;c<st.cols-1;c++){
+          const col=grid[r][c];
+          if (col && grid[r+1][c]===col && grid[r][c+1]===col && grid[r+1][c+1]===col) {
+            toRemove.add(`${r},${c}`);
+            toRemove.add(`${r+1},${c}`);
+            toRemove.add(`${r},${c+1}`);
+            toRemove.add(`${r+1},${c+1}`);
+          }
+        }
+      }
+      if (!toRemove.size) { checkFail(); return; }
+      const uniq = Array.from(toRemove).map(s=>s.split(',').map(Number));
+      score += uniq.length; updateUI();
+      uniq.forEach(([x,y])=> gridEl.children[x*st.cols+y].classList.add('blink'));
+      setTimeout(()=>{
+        uniq.forEach(([x,y])=>{const cell=gridEl.children[x*st.cols+y];cell.classList.remove('blink');cell.classList.add('destroy');});
+        setTimeout(()=>{
+          uniq.forEach(([x,y])=> grid[x][y]=null);
+          applyGravity(); renderGrid();
+          let empties=0; for(let i=0;i<st.rows;i++) for(let j=0;j<st.cols;j++) if(!grid[i][j]) empties++;
+          if (empties >= Math.floor((st.rows*st.cols)/2)) fillAllBlanks();
+          else if (score >= st.target) onStageSuccess();
+          else setTimeout(resolveMatches, 300);
+        },300);
+      },500);
+    }
+
+    function applyGravity() {
+      const st=stages[currentStage];
+      for (let c=0;c<st.cols;c++) {
+        let empty=0;
+        for (let r=st.rows-1;r>=0;r--) {
+          if (!grid[r][c]) empty++;
+          else if (empty>0) { grid[r+empty][c] = grid[r][c]; grid[r][c] = null; }
+        }
+      }
+    }
+
+    function fillAllBlanks() {
+      const st=stages[currentStage]; const filled=[];
+      for (let r=0;r<st.rows;r++) for (let c=0;c<st.cols;c++) if (!grid[r][c]) { grid[r][c]=COLORS[Math.floor(Math.random()*COLORS.length)]; filled.push([r,c]); }
+      renderGrid(); filled.forEach(([x,y])=>{const cell=gridEl.children[x*st.cols+y];cell.style.transform=`translateY(-${st.rows*52}px)`;});
+      requestAnimationFrame(()=>{ filled.forEach(([x,y])=>{const cell=gridEl.children[x*st.cols+y];cell.style.transition='transform 0.5s ease';cell.style.transform='';}); });
+      setTimeout(()=>{ if (score >= stages[currentStage].target) onStageSuccess(); else setTimeout(resolveMatches,300); },600);
+    }
+
+    function onStageSuccess() {
+      gameActive = false; messageEl.style.display='block';
+      if (currentStage < stages.length-1) {
+        messageEl.innerHTML = `<div>축하합니다! ${currentStage+1}단계 성공!</div><button id="nextBtn">다음 스테이지</button>`;
+        document.getElementById('nextBtn').addEventListener('click',()=>{ messageEl.style.display='none'; currentStage++; initStage(); });
+      } else {
+        messageEl.innerHTML = `<div>축하합니다! 모두 성공하였습니다!</div><button id="homeBtn">처음으로 돌아가기</button>`;
+        document.getElementById('homeBtn').addEventListener('click', restart);
+      }
+    }
+
+    function checkFail() {
+      if (swapsRemaining <= 0) {
+        gameActive = false; messageEl.style.display='block';
+        messageEl.innerHTML = `<div>Game Over</div><button id="restartBtn">처음으로 돌아가기</button>`;
+        document.getElementById('restartBtn').addEventListener('click', restart);
+      }
+    }
+
+    function restart() {
+      currentStage=0; startScreen.style.display='block'; gameScreen.style.display='none'; messageEl.style.display='none';
+    }
+
+    // 게임 시작
     initStage();
   </script>
 </body>
